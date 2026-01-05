@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kas Kelas & Bot WA</title>
+    <title>Admin Kas Kelas</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
@@ -11,29 +11,26 @@
 </head>
 <body class="bg-gray-100 min-h-screen p-4 md:p-8">
 
-    <div class="max-w-4xl mx-auto space-y-6">
+    <div id="app-container" class="max-w-4xl mx-auto space-y-6" style="display: none;">
         
         <div class="bg-blue-600 text-white p-6 rounded-2xl shadow-lg text-center">
             <h2 class="text-sm opacity-80 uppercase tracking-wide">Total Saldo Kas Saat Ini</h2>
-            <h1 class="text-4xl font-bold mt-2" id="totalSaldo">Rp 0</h1>
+            <h1 class="text-4xl font-bold mt-2" id="totalSaldo">Loading...</h1>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
             <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-green-500">
                 <h3 class="font-bold text-lg mb-4 text-gray-700">💰 Bayar Kas Siswa</h3>
                 <div class="space-y-3">
                     <div>
                         <label class="text-xs text-gray-500">Pilih Nama Siswa</label>
-                        <select id="pilihSiswa" class="w-full p-3 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-300"></select>
+                        <select id="pilihSiswa" class="w-full p-3 border rounded-lg bg-gray-50"></select>
                     </div>
                     <div>
                         <label class="text-xs text-gray-500">Nominal (Rp)</label>
                         <input type="number" id="jumlahSiswa" class="w-full p-3 border rounded-lg" placeholder="Contoh: 5000">
                     </div>
-                    <button onclick="bayarKas()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition">
-                        Simpan Pembayaran
-                    </button>
+                    <button onclick="bayarKas()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg">Simpan Pembayaran</button>
                 </div>
             </div>
 
@@ -45,15 +42,13 @@
                             <option value="keluar">🔴 Keluar</option>
                             <option value="masuk">🟢 Masuk</option>
                         </select>
-                        <input type="text" id="keteranganLain" class="w-2/3 p-3 border rounded-lg" placeholder="Ket: Beli Sapu, Spidol..">
+                        <input type="text" id="keteranganLain" class="w-2/3 p-3 border rounded-lg" placeholder="Ket: Beli Sapu...">
                     </div>
                     <div>
                          <label class="text-xs text-gray-500">Nominal (Rp)</label>
                         <input type="number" id="jumlahLain" class="w-full p-3 border rounded-lg" placeholder="Nominal">
                     </div>
-                    <button onclick="transaksiLain()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg transition">
-                        Catat Transaksi
-                    </button>
+                    <button onclick="transaksiLain()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg">Catat Transaksi</button>
                 </div>
             </div>
         </div>
@@ -61,180 +56,196 @@
         <div class="bg-white rounded-xl shadow-md overflow-hidden">
             <div class="p-4 bg-gray-50 border-b flex justify-between items-center">
                 <h3 class="font-bold text-gray-700">📋 Data Kas Siswa</h3>
-                <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Target Lunas: Rp<span id="targetText">5000</span></span>
+                <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Target: Rp<span id="targetText">...</span></span>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead class="bg-gray-100 text-gray-600 text-sm">
-                        <tr>
-                            <th class="p-4">Nama Siswa</th>
-                            <th class="p-4">Total Bayar</th>
-                            <th class="p-4 text-center">Status</th>
-                        </tr>
+                        <tr><th class="p-4">Nama</th><th class="p-4">Total</th><th class="p-4 text-center">Status</th></tr>
                     </thead>
-                    <tbody id="tabelSiswa" class="divide-y divide-gray-200">
-                        </tbody>
+                    <tbody id="tabelSiswa" class="divide-y divide-gray-200"></tbody>
                 </table>
             </div>
         </div>
 
         <div class="bg-white rounded-xl shadow-md overflow-hidden">
-            <div class="p-4 bg-gray-50 border-b">
-                <h3 class="font-bold text-gray-700">history Riwayat Keuangan (Terbaru)</h3>
-            </div>
+            <div class="p-4 bg-gray-50 border-b"><h3 class="font-bold text-gray-700">History Terbaru</h3></div>
             <div class="overflow-x-auto max-h-64">
                 <table class="w-full text-left text-sm">
                     <thead class="bg-gray-100 sticky top-0">
-                        <tr>
-                            <th class="p-3">Tanggal</th>
-                            <th class="p-3">Keterangan</th>
-                            <th class="p-3">Jenis</th>
-                            <th class="p-3 text-right">Jumlah</th>
-                        </tr>
+                        <tr><th class="p-3">Tanggal</th><th class="p-3">Ket</th><th class="p-3">Jenis</th><th class="p-3 text-right">Jml</th></tr>
                     </thead>
-                    <tbody id="tabelRiwayat" class="divide-y divide-gray-200">
-                        </tbody>
+                    <tbody id="tabelRiwayat" class="divide-y divide-gray-200"></tbody>
                 </table>
             </div>
         </div>
-        
     </div>
 
-<script>
-        const password = prompt("Masukkan Password Bendahara:");
-            if (password !== "sayang") {
-                alert("Password Salah! Anda akan dialihkan ke halaman siswa.");
-                window.location.href = "index.html"; // Tendang ke halaman publik
-            }
-        // --- KONFIGURASI PENTING ---
-        // Ganti tanggal ini dengan SENIN PERTAMA mulai kas jam 08:00
-        // Format: YYYY-MM-DDTHH:mm:ss
+    <script>
+        // --- 1. SETUP VARIABEL GLOBAL ---
+        // Kita deklarasikan variabel "db" bukan "supabase" agar tidak bentrok
+        let db = null; 
         const TANGGAL_MULAI_KAS = new Date('2025-01-06T08:00:00'); 
-        
         const BIAYA_PER_MINGGU = 5000;
 
-        // GANTI DENGAN KODE SUPABASE KAMU
-        const supabaseUrl = 'https://ffsclgcnkqedozepmvbx.supabase.co'; 
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmc2NsZ2Nua3FlZG96ZXBtdmJ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2MTcwOTAsImV4cCI6MjA4MzE5MzA5MH0.W8teVO6_RYy72cu7U1WL89CKAyaY2VIUoZVqzYzT7rM';
-        const supabase = _supabase.createClient(supabaseUrl, supabaseKey);
-
-        // --- RUMUS MENGHITUNG MINGGU & TARGET ---
-        function hitungTargetSaatIni() {
-            const sekarang = new Date();
+        // --- 2. JALANKAN SAAT HALAMAN SELESAI DIMUAT ---
+        window.onload = function() {
+            console.log("Halaman siap, meminta password...");
             
-            // Hitung selisih waktu (dalam milidetik)
-            const selisihWaktu = sekarang - TANGGAL_MULAI_KAS;
-            
-            // Jika belum mulai, target 0
-            if (selisihWaktu < 0) return { mingguKe: 0, nominal: 0 };
+            // Beri jeda 0.5 detik agar loading library tuntas
+            setTimeout(() => {
+                const passInput = prompt("🔐 Masukkan Password Bendahara:");
 
-            // Konversi milidetik ke minggu (1 minggu = 7 * 24 * 60 * 60 * 1000 ms)
-            // Math.floor untuk pembulatan ke bawah, ditambah 1 karena minggu berjalan dihitung
-            const mingguKe = Math.floor(selisihWaktu / (1000 * 60 * 60 * 24 * 7)) + 1;
-            const targetNominal = mingguKe * BIAYA_PER_MINGGU;
+                // PASSWORD: sayang
+                if (passInput === "sayang") {
+                    console.log("Password benar!");
+                    
+                    // 1. Munculkan Konten
+                    document.getElementById('app-container').style.display = 'block';
 
-            return { mingguKe, nominal: targetNominal };
+                    // 2. Koneksi Database
+                    initDatabase();
+                } else {
+                    alert("Password Salah! Anda akan dialihkan.");
+                    window.location.href = "index.html";
+                }
+            }, 500);
+        };
+
+        // --- 3. FUNGSI KONEKSI DATABASE ---
+        function initDatabase() {
+            // Masukkan Kunci Supabase BARU disini
+            const sbUrl = 'https://ffsclgcnkqedozepmvbx.supabase.co';
+            const sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmc2NsZ2Nua3FlZG96ZXBtdmJ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2MTcwOTAsImV4cCI6MjA4MzE5MzA5MH0.W8teVO6_RYy72cu7U1WL89CKAyaY2VIUoZVqzYzT7rM'; 
+
+            try {
+                // Inisialisasi ke variabel global "db"
+                db = _supabase.createClient(sbUrl, sbKey);
+                console.log("Database terhubung");
+                
+                // Ambil data pertama kali
+                loadData();
+            } catch (error) {
+                console.error("Gagal connect Supabase:", error);
+                alert("Gagal menghubungi database. Cek internet!");
+            }
         }
 
+        // --- 4. LOGIKA HITUNG TARGET ---
+        function hitungTargetSaatIni() {
+            const sekarang = new Date();
+            const selisih = sekarang - TANGGAL_MULAI_KAS;
+            if (selisih < 0) return { mingguKe: 0, nominal: 0 };
+            const mingguKe = Math.floor(selisih / (1000 * 60 * 60 * 24 * 7)) + 1;
+            return { mingguKe, nominal: mingguKe * BIAYA_PER_MINGGU };
+        }
+
+        // --- 5. LOAD DATA UTAMA ---
         async function loadData() {
-            // Hitung Target Hari Ini
-            const dataTarget = hitungTargetSaatIni();
-            
-            // Tampilkan Info Target di Web
-            document.getElementById('targetText').innerHTML = 
-                `Minggu ke-${dataTarget.mingguKe} (Target: Rp ${dataTarget.nominal.toLocaleString()})`;
+            if (!db) return; // Stop jika db belum siap
 
-            // Ambil Data Siswa
-            const { data: dataSiswa, error } = await supabase.from('siswa').select('*').order('nama');
-            
-            // Render Tabel
-            const tabelSiswa = document.getElementById('tabelSiswa');
-            const selectSiswa = document.getElementById('pilihSiswa');
-            tabelSiswa.innerHTML = '';
-            selectSiswa.innerHTML = '<option value="">-- Pilih Siswa --</option>';
+            const target = hitungTargetSaatIni();
+            document.getElementById('targetText').innerText = target.nominal.toLocaleString();
 
-            dataSiswa.forEach(siswa => {
-                const tunggakan = dataTarget.nominal - siswa.total_bayar;
-                let statusBadge = '';
-                let infoTunggakan = '';
+            // A. DATA SISWA
+            const { data: listSiswa, error } = await db.from('siswa').select('*').order('nama');
+            
+            if (error) {
+                console.error(error);
+                return alert("Error mengambil data siswa.");
+            }
+
+            const tabel = document.getElementById('tabelSiswa');
+            const dropdown = document.getElementById('pilihSiswa');
+            
+            tabel.innerHTML = '';
+            dropdown.innerHTML = '<option value="">-- Pilih Siswa --</option>';
+
+            listSiswa.forEach(siswa => {
+                const tunggakan = target.nominal - siswa.total_bayar;
+                let statusBadge, infoKurang;
 
                 if (tunggakan <= 0) {
-                    // LUNAS (atau ada lebihan/tabungan)
                     statusBadge = `<span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">LUNAS</span>`;
-                    if(tunggakan < 0) infoTunggakan = `<span class="text-xs text-green-600">(Simpanan +Rp${Math.abs(tunggakan).toLocaleString()})</span>`;
+                    infoKurang = '';
                 } else {
-                    // BELUM LUNAS
                     statusBadge = `<span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-bold">MINUS</span>`;
-                    infoTunggakan = `<span class="text-xs text-red-600 font-bold">Kurang: Rp ${tunggakan.toLocaleString()}</span>`;
+                    infoKurang = `<br><span class="text-xs text-red-600 font-bold">Kurang: Rp ${tunggakan.toLocaleString()}</span>`;
                 }
-                
-                tabelSiswa.innerHTML += `
+
+                tabel.innerHTML += `
                     <tr class="hover:bg-gray-50 border-b">
                         <td class="p-4 font-medium">${siswa.nama}</td>
-                        <td class="p-4 text-gray-600">
-                            Rp ${siswa.total_bayar.toLocaleString()}
-                            <br>${infoTunggakan}
-                        </td>
+                        <td class="p-4 text-gray-600">Rp ${siswa.total_bayar.toLocaleString()}${infoKurang}</td>
                         <td class="p-4 text-center">${statusBadge}</td>
                     </tr>
                 `;
 
-                selectSiswa.innerHTML += `<option value="${siswa.id}" data-nama="${siswa.nama}" data-current="${siswa.total_bayar}">${siswa.nama}</option>`;
+                // Isi dropdown
+                dropdown.innerHTML += `<option value="${siswa.id}" data-nama="${siswa.nama}" data-total="${siswa.total_bayar}">${siswa.nama}</option>`;
             });
 
-            // --- BAGIAN RIWAYAT & SALDO TOTAL TETAP SAMA SEPERTI SEBELUMNYA ---
-            // (Copy bagian load riwayat dari kode sebelumnya atau biarkan saja logic saldo disini)
-            const { data: allTrans } = await supabase.from('transaksi').select('*').order('tanggal', {ascending:false});
+            // B. RIWAYAT
+            const { data: listTrans } = await db.from('transaksi').select('*').order('tanggal', {ascending:false});
             
-            let saldoTotal = 0;
-            const tabelRiwayat = document.getElementById('tabelRiwayat');
-            tabelRiwayat.innerHTML = '';
+            let saldo = 0;
+            const tabelLog = document.getElementById('tabelRiwayat');
+            tabelLog.innerHTML = '';
 
-            if(allTrans){
-                allTrans.forEach(tr => {
-                    if(tr.jenis === 'masuk') saldoTotal += tr.jumlah; else saldoTotal -= tr.jumlah;
-                    // Render 10 teratas saja
-                    if(tabelRiwayat.childElementCount < 10) {
+            if (listTrans) {
+                listTrans.forEach(tr => {
+                    if (tr.jenis === 'masuk') saldo += tr.jumlah; else saldo -= tr.jumlah;
+                    
+                    // Batasi tampilan cuma 10
+                    if (tabelLog.childElementCount < 10) {
                         const warna = tr.jenis === 'masuk' ? 'text-green-600' : 'text-red-600';
-                         tabelRiwayat.innerHTML += `
+                        tabelLog.innerHTML += `
                             <tr>
-                                <td class="p-3 text-xs">${new Date(tr.tanggal).toLocaleDateString()}</td>
+                                <td class="p-3 text-xs text-gray-400">${new Date(tr.tanggal).toLocaleDateString()}</td>
                                 <td class="p-3">${tr.keterangan}</td>
                                 <td class="p-3 font-bold ${warna}">${tr.jenis}</td>
                                 <td class="p-3 text-right">Rp ${tr.jumlah.toLocaleString()}</td>
-                            </tr>`;
+                            </tr>
+                        `;
                     }
                 });
             }
-            document.getElementById('totalSaldo').innerText = `Rp ${saldoTotal.toLocaleString()}`;
+            document.getElementById('totalSaldo').innerText = "Rp " + saldo.toLocaleString();
         }
 
-        // --- FUNGSI BAYAR & TRANSAKSI LAIN (Copy Paste saja yang lama, tidak berubah) ---
+        // --- 6. AKSI TOMBOL ---
         async function bayarKas() {
-            const select = document.getElementById('pilihSiswa');
-            const idSiswa = select.value;
-            const namaSiswa = select.options[select.selectedIndex].getAttribute('data-nama');
-            const currentTotal = parseInt(select.options[select.selectedIndex].getAttribute('data-current'));
+            const dropdown = document.getElementById('pilihSiswa');
+            const id = dropdown.value;
+            const nama = dropdown.options[dropdown.selectedIndex]?.getAttribute('data-nama');
+            const currentTotal = parseInt(dropdown.options[dropdown.selectedIndex]?.getAttribute('data-total') || 0);
             const jumlah = parseInt(document.getElementById('jumlahSiswa').value);
-            if(!idSiswa || !jumlah) return alert("Data tidak lengkap");
 
-            await supabase.from('siswa').update({ total_bayar: currentTotal + jumlah }).eq('id', idSiswa);
-            await supabase.from('transaksi').insert({ jenis: 'masuk', keterangan: `Kas: ${namaSiswa}`, jumlah: jumlah });
-            
-            alert("Berhasil!"); loadData(); document.getElementById('jumlahSiswa').value = '';
+            if (!id || !jumlah) return alert("Pilih siswa dan isi jumlah!");
+
+            // Update Siswa
+            await db.from('siswa').update({ total_bayar: currentTotal + jumlah }).eq('id', id);
+            // Catat Transaksi
+            await db.from('transaksi').insert({ jenis: 'masuk', keterangan: `Kas: ${nama}`, jumlah: jumlah });
+
+            alert("Berhasil!");
+            document.getElementById('jumlahSiswa').value = '';
+            loadData();
         }
 
         async function transaksiLain() {
             const jenis = document.getElementById('jenisTransaksi').value;
             const ket = document.getElementById('keteranganLain').value;
             const jumlah = parseInt(document.getElementById('jumlahLain').value);
-            if(!ket || !jumlah) return alert("Lengkapi data");
 
-            await supabase.from('transaksi').insert({ jenis, keterangan: ket, jumlah });
-            alert("Tersimpan!"); loadData();
+            if (!ket || !jumlah) return alert("Lengkapi keterangan dan jumlah!");
+
+            await db.from('transaksi').insert({ jenis, keterangan: ket, jumlah });
+            alert("Tersimpan!");
+            document.getElementById('keteranganLain').value = '';
+            document.getElementById('jumlahLain').value = '';
+            loadData();
         }
-
-        loadData();
     </script>
 </body>
 </html>
