@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cek Kas Kelas</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>body { font-family: 'Poppins', sans-serif; }</style>
 </head>
@@ -26,9 +26,6 @@
             <input type="text" id="searchInput" onkeyup="filterSiswa()" 
                 placeholder="🔍 Cari nama kamu disini..." 
                 class="w-full p-4 pl-12 rounded-xl border-none shadow-sm focus:ring-2 focus:ring-blue-400 outline-none">
-            <span class="absolute left-4 top-4 text-gray-400">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-            </span>
         </div>
 
         <div class="bg-blue-600 text-white p-3 rounded-lg text-center text-sm shadow-md">
@@ -45,8 +42,7 @@
                             <th class="p-4 text-center">Status</th>
                         </tr>
                     </thead>
-                    <tbody id="tabelSiswa" class="divide-y divide-gray-200">
-                        </tbody>
+                    <tbody id="tabelSiswa" class="divide-y divide-gray-200"></tbody>
                 </table>
             </div>
         </div>
@@ -57,8 +53,7 @@
             </div>
             <div class="overflow-y-auto max-h-60">
                 <table class="w-full text-left text-sm">
-                    <tbody id="tabelRiwayat" class="divide-y divide-gray-200">
-                        </tbody>
+                    <tbody id="tabelRiwayat" class="divide-y divide-gray-200"></tbody>
                 </table>
             </div>
         </div>
@@ -71,16 +66,19 @@
     </div>
 
     <script>
-        // --- KONFIGURASI SAMA PERSIS DENGAN ADMIN ---
+        // --- KONFIGURASI ---
         const TANGGAL_MULAI_KAS = new Date('2025-01-06T08:00:00'); 
         const BIAYA_PER_MINGGU = 5000;
         
-        // MASUKKAN KODE SUPABASE KAMU DISINI
+        // --- SETUP SUPABASE ---
+        // GANTI DENGAN KUNCI BARU KAMU!
         const supabaseUrl = 'https://ffsclgcnkqedozepmvbx.supabase.co'; 
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmc2NsZ2Nua3FlZG96ZXBtdmJ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2MTcwOTAsImV4cCI6MjA4MzE5MzA5MH0.W8teVO6_RYy72cu7U1WL89CKAyaY2VIUoZVqzYzT7rM';
-        const supabase = _supabase.createClient(supabaseUrl, supabaseKey);
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmc2NsZ2Nua3FlZG96ZXBtdmJ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2MTcwOTAsImV4cCI6MjA4MzE5MzA5MH0.W8teVO6_RYy72cu7U1WL89CKAyaY2VIUoZVqzYzT7rM'; 
+        
+        // Inisialisasi Database
+        const db = supabase.createClient(supabaseUrl, supabaseKey);
 
-        // --- LOGIKA HITUNG TARGET (SAMA) ---
+        // --- LOGIKA PROGRAM ---
         function hitungTargetSaatIni() {
             const sekarang = new Date();
             const selisihWaktu = sekarang - TANGGAL_MULAI_KAS;
@@ -94,8 +92,14 @@
             document.getElementById('targetText').innerHTML = 
                 `🔔 Saat ini <b>Minggu ke-${dataTarget.mingguKe}</b>. Target Wajib: <b>Rp ${dataTarget.nominal.toLocaleString()}</b>`;
 
-            // 1. AMBIL DATA SISWA (READ ONLY)
-            const { data: dataSiswa } = await supabase.from('siswa').select('*').order('nama');
+            // 1. AMBIL DATA SISWA
+            const { data: dataSiswa, error } = await db.from('siswa').select('*').order('nama');
+            
+            if(error) {
+                console.error(error);
+                return alert("Gagal mengambil data. Cek Key Supabase!");
+            }
+
             const tabelSiswa = document.getElementById('tabelSiswa');
             tabelSiswa.innerHTML = '';
 
@@ -114,7 +118,6 @@
                     `;
                 }
 
-                // Tambahkan class 'nama-siswa' untuk fitur pencarian
                 tabelSiswa.innerHTML += `
                     <tr class="hover:bg-gray-50 transition item-siswa">
                         <td class="p-4 font-medium text-gray-700 nama-siswa">${siswa.nama}</td>
@@ -124,8 +127,8 @@
                 `;
             });
 
-            // 2. AMBIL RIWAYAT & SALDO
-            const { data: allTrans } = await supabase.from('transaksi').select('*').order('tanggal', {ascending:false});
+            // 2. AMBIL RIWAYAT
+            const { data: allTrans } = await db.from('transaksi').select('*').order('tanggal', {ascending:false});
             let saldoTotal = 0;
             const tabelRiwayat = document.getElementById('tabelRiwayat');
             tabelRiwayat.innerHTML = '';
@@ -134,19 +137,14 @@
                 allTrans.forEach(tr => {
                     if(tr.jenis === 'masuk') saldoTotal += tr.jumlah; else saldoTotal -= tr.jumlah;
                     
-                    // Hanya tampilkan 10 riwayat terakhir
                     if(tabelRiwayat.childElementCount < 10) {
                         const warna = tr.jenis === 'masuk' ? 'text-green-600' : 'text-red-600';
                         const icon = tr.jenis === 'masuk' ? '⬇️' : '⬆️';
                         tabelRiwayat.innerHTML += `
                             <tr>
                                 <td class="p-3 text-xs text-gray-400 w-24">${new Date(tr.tanggal).toLocaleDateString()}</td>
-                                <td class="p-3">
-                                    <div class="font-medium text-gray-700">${tr.keterangan}</div>
-                                </td>
-                                <td class="p-3 text-right font-bold ${warna}">
-                                    ${icon} Rp ${tr.jumlah.toLocaleString()}
-                                </td>
+                                <td class="p-3"><div class="font-medium text-gray-700">${tr.keterangan}</div></td>
+                                <td class="p-3 text-right font-bold ${warna}">${icon} Rp ${tr.jumlah.toLocaleString()}</td>
                             </tr>`;
                     }
                 });
@@ -154,18 +152,12 @@
             document.getElementById('totalSaldo').innerText = `Rp ${saldoTotal.toLocaleString()}`;
         }
 
-        // --- FITUR PENCARIAN ---
         function filterSiswa() {
             const input = document.getElementById('searchInput').value.toLowerCase();
             const baris = document.getElementsByClassName('item-siswa');
-
             for (let i = 0; i < baris.length; i++) {
                 const nama = baris[i].getElementsByClassName('nama-siswa')[0].innerText.toLowerCase();
-                if (nama.includes(input)) {
-                    baris[i].style.display = "";
-                } else {
-                    baris[i].style.display = "none";
-                }
+                baris[i].style.display = nama.includes(input) ? "" : "none";
             }
         }
 
